@@ -19,6 +19,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--work-dir',
                         help='directory to save evaluation logs '
                         '(default: work_dirs/<config stem>)')
+    parser.add_argument('--device', choices=['cpu', 'mps', 'cuda'],
+                        default=None,
+                        help='force the compute device (default: auto — mps '
+                        'on Apple Silicon)')
     parser.add_argument('--cfg-options', nargs='+', action=DictAction,
                         help='override config entries, e.g. '
                         'test_dataloader.batch_size=256')
@@ -31,7 +35,7 @@ def main() -> None:
     cfg.load_from = args.checkpoint
 
     runner = build_runner(cfg, work_dir=args.work_dir,
-                          cfg_options=args.cfg_options)
+                          cfg_options=args.cfg_options, device=args.device)
     runner.test()
 
 
