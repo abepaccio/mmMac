@@ -1,1 +1,1 @@
-from mmmac.models import backbones  # noqa: F401
+from mmmac.models import backbones, temporal  # noqa: F401

@@ -45,17 +45,42 @@ The same pattern works for any library in the stack (`mmdet`, `mmseg`,
 `mmmac/datasets/mnist.py`, which subclasses mmpretrain's MNIST just to fix
 the download mirror.
 
+### Pattern 2 — a brand-new (e.g. time-series) model
+
+Tasks without an upstream library implement
+`mmengine.model.BaseModel.forward(inputs, labels, mode)` directly; the
+Runner, hooks, checkpointing and wandb logging all work unchanged.
+`mmmac/models/temporal/lstm_classifier.py` +
+`mmmac/datasets/time_series.py` + `configs/time_series/lstm_waveform.py`
+form a complete working example.
+
 ```mermaid
 classDiagram
     class BaseModel["mmengine.model.BaseModel"]
     class LeNet5["mmpretrain LeNet5"]
     class MMPretrainMNIST["mmpretrain MNIST"]
     class CustomLeNet5["mmmac.CustomLeNet5"]
+    class LSTMClassifier["mmmac.LSTMClassifier"]
     class MNIST["mmmac.MNIST"]
+    class SyntheticWaveformDataset["mmmac.SyntheticWaveformDataset"]
     BaseModel <|-- LeNet5
     LeNet5 <|-- CustomLeNet5 : pattern 1 (subclass upstream)
+    BaseModel <|-- LSTMClassifier : pattern 2 (from scratch)
     MMPretrainMNIST <|-- MNIST : pattern 1 for datasets
+    class TorchDataset["torch.utils.data.Dataset"]
+    TorchDataset <|-- SyntheticWaveformDataset : pattern 2 for datasets
 ```
+
+Contract for `forward(inputs, labels, mode)`:
+
+- `mode='loss'` → return `dict(loss=...)` (used by the train loop)
+- `mode='predict'` → return a list of per-sample dicts
+  (`pred_label`, `gt_label`), consumed by `mmmac.SimpleAccuracy`
+- `mode='tensor'` → return raw logits (debugging / export)
+
+For plain-tensor datasets, set
+`collate_fn=dict(type='default_collate')` in the dataloader config (the
+mmengine default `pseudo_collate` does not stack tensors).
 
 ---
 
@@ -104,14 +129,39 @@ class CustomLeNet5(LeNet5):
 `mmmac/datasets/mnist.py` は mmpretrain の MNIST を継承して
 ダウンロードミラーだけを修正しています。
 
+### パターン 2 — 完全に新規の(例: 時系列)モデル
+
+アップストリームにライブラリがないタスクは、
+`mmengine.model.BaseModel.forward(inputs, labels, mode)` を直接実装
+します。Runner・フック・チェックポイント・wandb ロギングはそのまま
+動作します。`mmmac/models/temporal/lstm_classifier.py` +
+`mmmac/datasets/time_series.py` + `configs/time_series/lstm_waveform.py`
+が完全な動作例です。
+
 ```mermaid
 classDiagram
     class BaseModel["mmengine.model.BaseModel"]
     class LeNet5["mmpretrain LeNet5"]
     class MMPretrainMNIST["mmpretrain MNIST"]
     class CustomLeNet5["mmmac.CustomLeNet5"]
+    class LSTMClassifier["mmmac.LSTMClassifier"]
     class MNIST["mmmac.MNIST"]
+    class SyntheticWaveformDataset["mmmac.SyntheticWaveformDataset"]
     BaseModel <|-- LeNet5
     LeNet5 <|-- CustomLeNet5 : パターン1 (アップストリームを継承)
+    BaseModel <|-- LSTMClassifier : パターン2 (ゼロから実装)
     MMPretrainMNIST <|-- MNIST : データセット版パターン1
+    class TorchDataset["torch.utils.data.Dataset"]
+    TorchDataset <|-- SyntheticWaveformDataset : データセット版パターン2
 ```
+
+`forward(inputs, labels, mode)` の契約:
+
+- `mode='loss'` → `dict(loss=...)` を返す(train ループが使用)
+- `mode='predict'` → サンプルごとの dict(`pred_label`、`gt_label`)の
+  リストを返す。`mmmac.SimpleAccuracy` が消費します
+- `mode='tensor'` → 生の logits を返す(デバッグ / エクスポート用)
+
+素のテンソルを返すデータセットでは、dataloader config に
+`collate_fn=dict(type='default_collate')` を指定してください
+(mmengine デフォルトの `pseudo_collate` はテンソルをスタックしません)。
