@@ -29,4 +29,8 @@ randomness = dict(seed=0, deterministic=False)
 default_hooks = dict(
     logger=dict(type='LoggerHook', interval=50),
     checkpoint=dict(type='CheckpointHook', interval=200, max_keep_ckpts=1),
+    # 64 val samples → dump every 16th → 4 images per val run
+    # (resize=448 is inherited from the base config's hook settings)
+    visualization=dict(type='mmpretrain.VisualizationHook', enable=True,
+                       interval=16),
 )
