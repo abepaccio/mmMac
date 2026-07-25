@@ -54,5 +54,7 @@ Smoke config (no download, ~15 s):
   `mmmac/models/temporal/lstm_classifier.py` +
   `mmmac/datasets/time_series.py` + `configs/time_series/lstm_waveform.py`
 - Custom metric: `mmmac/evaluation/metrics/simple_accuracy.py`
+- Custom hook (time-series visualization):
+  `mmmac/engine/hooks/waveform_visualization_hook.py`
 
 Details: docs/extending.md.
