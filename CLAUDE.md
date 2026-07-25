@@ -37,8 +37,12 @@ Smoke config (no download, ~15 s):
   (mirror structure). Runner-level behavior → `tests/integration/`;
   learning-capability checks → `tests/overfit/`.
 - Configs inherit `configs/_base_/default_runtime.py`. Keep the gloo
-  backend (macOS constraint). wandb is opt-in via
-  `configs/_base_/vis_wandb.py`.
+  backend (macOS constraint). `num_workers=0` is the safe default;
+  values > 0 work — pair with `persistent_workers=True`. wandb is opt-in
+  via `configs/_base_/vis_wandb.py`.
+- Device is auto-selected (MPS on Apple Silicon). `--device cpu|mps` on
+  tools/train.py & test.py overrides; CPU is faster for tiny models
+  (LeNet-size), MPS is ~17x faster for ResNet50-size models.
 - `data/` and `work_dirs/` are gitignored scratch space — never commit
   them, never store code there.
 
