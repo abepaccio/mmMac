@@ -63,3 +63,15 @@ optim_wrapper = dict(
     optimizer=dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=1e-4))
 param_scheduler = dict(type='MultiStepLR', by_epoch=True, milestones=[3],
                        gamma=0.1)
+
+# Save prediction visualizations for every `interval`-th val/test sample to
+# <work_dir>/<timestamp>/vis_data/vis_image/ (and to wandb when enabled).
+# The visualizer type is overridden (vis_backends/name are merged from
+# _base_) because VisualizationHook needs mmpretrain's UniversalVisualizer.
+# resize=448 normalizes the short edge BEFORE drawing, so the label text
+# keeps the same relative size for any input resolution (28px MNIST is
+# upscaled, multi-megapixel photos are downscaled).
+visualizer = dict(type='mmpretrain.UniversalVisualizer')
+default_hooks = dict(
+    visualization=dict(type='mmpretrain.VisualizationHook', enable=True,
+                       interval=2000, resize=448))

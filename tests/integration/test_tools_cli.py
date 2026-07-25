@@ -48,3 +48,6 @@ def test_train_then_test_via_cli(tmp_path, repo_root):
     )
     assert test.returncode == 0, test.stderr[-2000:]
     assert 'accuracy/top1' in (test.stdout + test.stderr)
+    # WaveformVisualizationHook must dump plots for every 10th test sample
+    vis_images = list((tmp_path / 'eval').rglob('vis_image/*.png'))
+    assert len(vis_images) == 3, vis_images
