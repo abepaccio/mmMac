@@ -23,6 +23,8 @@ dataset_type = 'mmmac.MNIST'
 data_root = 'data/mnist'
 pipeline = [dict(type='mmpretrain.PackInputs')]
 
+# num_workers=0 is the safe macOS default; >0 works too — pair it with
+# persistent_workers=True (see docs/training_and_testing.md).
 train_dataloader = dict(
     batch_size=128,
     num_workers=0,

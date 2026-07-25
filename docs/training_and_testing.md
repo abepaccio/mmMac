@@ -58,6 +58,47 @@ sequenceDiagram
   origin of every class obvious and avoids scope-resolution surprises.
 - Outputs go to `work_dirs/<config stem>/` (gitignored).
 
+### Device selection (Apple Silicon / MPS)
+
+The Runner auto-selects the device via mmengine's `get_device()`: **MPS
+(Apple GPU) when available, otherwise CPU**. Override it per run:
+
+```bash
+uv run python tools/train.py <config> --device cpu   # or mps / cuda
+```
+
+Whether MPS is faster depends on model size — kernel-launch overhead
+dominates for tiny models (measured on this repo's configs):
+
+| Workload | MPS | CPU | Faster |
+| --- | --- | --- | --- |
+| LeNet5 / MNIST, 1 epoch train+val (bs=128) | ~55 s | ~26 s | **CPU** |
+| ResNet50 train step (bs=16, 224²) | 212 ms/iter | 3587 ms/iter | **MPS (~17x)** |
+
+Rule of thumb: use `--device cpu` for LeNet-sized toys; leave the default
+(MPS) for anything ResNet-sized or larger.
+
+### DataLoader workers (`num_workers`)
+
+`num_workers > 0` is supported. The configs default to `0` because the
+sample datasets are in-memory (workers only add IPC overhead there), but
+for real datasets that decode files per sample, raise it:
+
+```bash
+uv run python tools/train.py <config> --cfg-options \
+    train_dataloader.num_workers=4 train_dataloader.persistent_workers=True
+```
+
+Notes for macOS:
+
+- Always set `persistent_workers=True` with `num_workers > 0`, so workers
+  survive across epochs instead of being re-forked every epoch.
+- Worker processes use the `fork` start method
+  (`env_cfg.mp_cfg.mp_start_method` in `configs/_base_/default_runtime.py`).
+  If a third-party library crashes in forked children (a known macOS
+  hazard with some Objective-C-backed libs), switch that setting to
+  `'spawn'`.
+
 ### Where outputs go
 
 Each run writes to `work_dirs/<config stem>/` (or `--work-dir`):
@@ -151,6 +192,49 @@ sequenceDiagram
   使います: `type='mmmac.CustomLeNet5'`、`type='mmpretrain.ClsHead'`。
   クラスの出所が明確になり、スコープ解決の事故を防ぎます。
 - 出力は `work_dirs/<config名>/` に保存されます (gitignore 対象)。
+
+### デバイス選択 (Apple Silicon / MPS)
+
+Runner は mmengine の `get_device()` でデバイスを自動選択します:
+**MPS (Apple GPU) が利用可能ならそれを、なければ CPU を使用**。実行ごとに
+上書きもできます:
+
+```bash
+uv run python tools/train.py <config> --device cpu   # または mps / cuda
+```
+
+MPS が速いかどうかはモデルサイズ次第です — 極小モデルではカーネル起動
+オーバーヘッドが支配的になります(本リポジトリの config での実測):
+
+| ワークロード | MPS | CPU | 速い方 |
+| --- | --- | --- | --- |
+| LeNet5 / MNIST、1エポック train+val (bs=128) | 約55秒 | 約26秒 | **CPU** |
+| ResNet50 の学習ステップ (bs=16, 224²) | 212 ms/iter | 3587 ms/iter | **MPS (約17倍)** |
+
+目安: LeNet 級のトイモデルは `--device cpu`、ResNet 級以上はデフォルト
+(MPS)のままにしてください。
+
+### DataLoader ワーカー (`num_workers`)
+
+`num_workers > 0` はサポートされています。サンプルのデータセットは
+インメモリ(ワーカーは IPC オーバーヘッドにしかならない)ため config の
+デフォルトは `0` ですが、サンプルごとにファイルをデコードする実データでは
+増やしてください:
+
+```bash
+uv run python tools/train.py <config> --cfg-options \
+    train_dataloader.num_workers=4 train_dataloader.persistent_workers=True
+```
+
+macOS での注意点:
+
+- `num_workers > 0` のときは必ず `persistent_workers=True` を併用して
+  ください。エポックごとにワーカーを再 fork せず、使い回せます。
+- ワーカープロセスは `fork` 方式で起動されます
+  (`configs/_base_/default_runtime.py` の
+  `env_cfg.mp_cfg.mp_start_method`)。サードパーティライブラリが fork
+  した子プロセスでクラッシュする場合(一部の Objective-C 系ライブラリで
+  既知の macOS の問題)は、この設定を `'spawn'` に変更してください。
 
 ### 出力先
 
