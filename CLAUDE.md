@@ -18,6 +18,9 @@ uv run python tools/test.py <config> <checkpoint>
 uv run python -m mmmac.utils.env      # environment / version report
 ```
 
+Smoke config (no download, ~15 s):
+`uv run python tools/train.py configs/time_series/lstm_waveform.py --cfg-options train_cfg.max_epochs=1`
+
 ## Hard rules
 
 - **Never bump a single dependency version.** torch/mmcv/mmdet/mmseg/
@@ -42,5 +45,9 @@ uv run python -m mmmac.utils.env      # environment / version report
 
 - Subclass an upstream model: `mmmac/models/backbones/lenet.py`
 - Subclass an upstream dataset: `mmmac/datasets/mnist.py`
+- From-scratch (time-series) model on mmengine BaseModel:
+  `mmmac/models/temporal/lstm_classifier.py` +
+  `mmmac/datasets/time_series.py` + `configs/time_series/lstm_waveform.py`
+- Custom metric: `mmmac/evaluation/metrics/simple_accuracy.py`
 
 Details: docs/extending.md.
