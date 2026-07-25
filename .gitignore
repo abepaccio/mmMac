@@ -1,0 +1,15 @@
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# data & experiment outputs (never commit)
+data/
+work_dirs/
+wandb/
+
+# os
+.DS_Store
