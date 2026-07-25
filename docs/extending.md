@@ -82,6 +82,13 @@ For plain-tensor datasets, set
 `collate_fn=dict(type='default_collate')` in the dataloader config (the
 mmengine default `pseudo_collate` does not stack tensors).
 
+### wandb integration
+
+Already wired: `configs/_base_/vis_wandb.py` swaps the visualizer's
+backends to `LocalVisBackend + WandbVisBackend`. Extend `init_kwargs`
+(project, entity, tags, ...) there or per experiment. Custom
+visualization backends belong in `mmmac/visualization/`.
+
 ---
 
 ## 日本語
@@ -165,3 +172,11 @@ classDiagram
 素のテンソルを返すデータセットでは、dataloader config に
 `collate_fn=dict(type='default_collate')` を指定してください
 (mmengine デフォルトの `pseudo_collate` はテンソルをスタックしません)。
+
+### wandb 統合
+
+すでに配線済みです: `configs/_base_/vis_wandb.py` がビジュアライザの
+バックエンドを `LocalVisBackend + WandbVisBackend` に切り替えます。
+`init_kwargs`(project、entity、tags など)はこのファイルまたは各実験
+config で拡張してください。カスタム可視化バックエンドは
+`mmmac/visualization/` に実装します。
