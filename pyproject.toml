@@ -1,0 +1,49 @@
+[project]
+name = "mmmac"
+version = "0.1.0"
+description = "OpenMMLab-based training / evaluation playground for macOS (Apple Silicon)"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    # Pinned as a mutually-compatible set for macOS arm64 (see docs/installation.md)
+    "numpy<2",
+    "torch==2.1.2",
+    "torchvision==0.16.2",
+    "mmengine>=0.10.3,<1.0",
+    "mmcv==2.1.0",
+    "mmpretrain==1.2.0",
+    "mmdet==3.2.0",
+    "mmsegmentation==1.2.2",
+    "mmdet3d==1.4.0",
+    "wandb>=0.16",
+    "ftfy",
+    "regex",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-timeout>=2.3",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mmmac"]
+
+[tool.uv]
+# mmcv ships no macOS wheel; its sdist build imports torch in setup.py.
+[tool.uv.extra-build-dependencies]
+# mmcv's setup.py imports torch and pkg_resources (removed from
+# setuptools>=81), so both must be present in the isolated build env.
+mmcv = ["torch==2.1.2", "numpy<2", "setuptools<81"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "overfit: long-running overfit sanity checks (downloads MNIST)",
+    "integration: end-to-end Runner / CLI tests",
+]
