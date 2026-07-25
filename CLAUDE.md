@@ -11,6 +11,10 @@ identical.
 ```bash
 ./install.sh                          # full env setup (idempotent)
 uv run pytest tests/unit -q           # fast tests
+uv run pytest -q -m "not overfit"     # everything except the MNIST test
+uv run pytest -q                      # full suite (downloads MNIST once)
+uv run python tools/train.py <config> [--work-dir D] [--resume] [--cfg-options k=v ...]
+uv run python tools/test.py <config> <checkpoint>
 uv run python -m mmmac.utils.env      # environment / version report
 ```
 
@@ -36,4 +40,7 @@ uv run python -m mmmac.utils.env      # environment / version report
 
 ## Extension patterns (working examples)
 
-(none yet — see docs/extending.md as patterns are added)
+- Subclass an upstream model: `mmmac/models/backbones/lenet.py`
+- Subclass an upstream dataset: `mmmac/datasets/mnist.py`
+
+Details: docs/extending.md.
