@@ -47,6 +47,7 @@ sequenceDiagram
 | --- | --- | --- |
 | `configs/mnist/lenet5_mnist.py` | MNIST 10-class classification | reference recipe; auto-downloads MNIST |
 | `configs/mnist/lenet5_mnist_overfit.py` | overfit 64 MNIST samples | sanity check, reaches 100% top-1 (~1 min) |
+| `configs/time_series/lstm_waveform.py` | 3-class waveform classification | time-series example, no download needed |
 
 ### Config conventions
 
@@ -126,6 +127,7 @@ sequenceDiagram
 | --- | --- | --- |
 | `configs/mnist/lenet5_mnist.py` | MNIST 10クラス分類 | 標準レシピ。MNIST は自動ダウンロード |
 | `configs/mnist/lenet5_mnist_overfit.py` | MNIST 64 サンプルへの過学習 | サニティチェック。top-1 100% に到達 (約1分) |
+| `configs/time_series/lstm_waveform.py` | 波形 3クラス分類 | 時系列の例。ダウンロード不要 |
 
 ### config の規約
 
