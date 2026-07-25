@@ -111,8 +111,32 @@ work_dirs/lenet5_mnist/
     ├── <timestamp>.log          # full text log
     └── vis_data/                # LocalVisBackend storage
         ├── config.py            # frozen config of the run
-        └── scalars.json         # every logged scalar (loss, accuracy, lr)
+        ├── scalars.json         # every logged scalar (loss, accuracy, lr)
+        └── vis_image/           # prediction visualizations (PNG)
+            └── <sample>_<epoch>.png
 ```
+
+The MNIST configs enable `mmpretrain.VisualizationHook`, which renders
+every `interval`-th val/test sample with its ground-truth and predicted
+label into `vis_data/vis_image/` (and to wandb when enabled). The overfit
+config dumps 4 images per validation run.
+
+The hook is configured with `resize=448`, which **normalizes the short
+edge of every image before drawing**. This keeps the label text at the
+same relative size regardless of input resolution: tiny images (28px
+MNIST) are upscaled so the text is not a smudge of dots, and
+multi-megapixel photos are downscaled so the text is not microscopic
+relative to the image. (Without it, the font scale is clamped at 3x —
+`get_adaptive_scale` in mmpretrain — so text stops growing beyond a
+672px short edge.) To tweak further, any `visualize_cls` argument can be
+set on the hook, e.g. `text_cfg=dict(font_sizes=20)` for an absolute
+font size.
+
+The time-series config uses `mmmac.WaveformVisualizationHook`
+(`mmmac/engine/hooks/`) instead, since mmpretrain's hook only handles
+images: it renders every `interval`-th val/test waveform as a line plot
+titled with the ground-truth and predicted class (green = correct,
+red = wrong) into the same `vis_data/vis_image/` location.
 
 **Note:** when a config is run through pytest (e.g. `tests/overfit/`),
 `work_dir` is pytest's `tmp_path`
@@ -248,8 +272,31 @@ work_dirs/lenet5_mnist/
     ├── <タイムスタンプ>.log      # テキストログ全文
     └── vis_data/                # LocalVisBackend の保存先
         ├── config.py            # 実行時の config スナップショット
-        └── scalars.json         # 記録された全スカラー (loss, accuracy, lr)
+        ├── scalars.json         # 記録された全スカラー (loss, accuracy, lr)
+        └── vis_image/           # 予測の可視化画像 (PNG)
+            └── <サンプルID>_<エポック>.png
 ```
+
+MNIST の config では `mmpretrain.VisualizationHook` を有効化しており、
+val/test の `interval` 枚ごとのサンプルを正解ラベル・予測ラベル付きで
+`vis_data/vis_image/` に描画します(wandb 有効時は wandb にも送信)。
+overfit config は検証 1 回につき 4 枚出力します。
+
+フックには `resize=448` を設定しており、**描画前にすべての画像の短辺を
+正規化**します。これにより入力解像度によらずラベル文字の相対サイズが
+一定になります: 極小画像(28px の MNIST)は拡大されて文字がドットの
+塊にならず、数メガピクセルの写真は縮小されて文字が相対的に極小化
+しません。(これがない場合、フォントスケールは 3 倍で頭打ちになるため
+— mmpretrain の `get_adaptive_scale` — 短辺 672px を超えると文字は
+それ以上大きくなりません。)さらに調整したい場合は `visualize_cls` の
+任意の引数をフックに設定できます。例: 絶対フォントサイズ指定は
+`text_cfg=dict(font_sizes=20)`。
+
+時系列 config では、mmpretrain のフックが画像専用のため、代わりに
+`mmmac.WaveformVisualizationHook`(`mmmac/engine/hooks/`)を使用します:
+val/test の `interval` 本ごとの波形を折れ線グラフとして描画し、正解
+クラスと予測クラスをタイトルに表示(正解=緑、不正解=赤)して、同じ
+`vis_data/vis_image/` に保存します。
 
 **注意:** config を pytest 経由(`tests/overfit/` など)で実行した場合、
 `work_dir` は pytest の `tmp_path`
