@@ -22,6 +22,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--resume', nargs='?', const='auto', default=None,
                         help='resume training; without a value, resume from '
                         'the latest checkpoint in work_dir')
+    parser.add_argument('--device', choices=['cpu', 'mps', 'cuda'],
+                        default=None,
+                        help='force the compute device (default: auto — mps '
+                        'on Apple Silicon; tip: cpu can be faster for tiny '
+                        'models)')
     parser.add_argument('--cfg-options', nargs='+', action=DictAction,
                         help='override config entries, e.g. '
                         'train_cfg.max_epochs=10 optim_wrapper.optimizer.lr=0.1')
@@ -40,7 +45,7 @@ def main() -> None:
         cfg.load_from = args.resume
 
     runner = build_runner(cfg, work_dir=args.work_dir,
-                          cfg_options=args.cfg_options)
+                          cfg_options=args.cfg_options, device=args.device)
     runner.train()
 
 
