@@ -59,3 +59,10 @@ optim_wrapper = dict(
 param_scheduler = None
 
 randomness = dict(seed=0)
+
+# Plot every 10th val/test waveform with GT/pred labels to
+# <work_dir>/<timestamp>/vis_data/vis_image/ (and wandb when enabled).
+# Class names come from the dataset's metainfo automatically.
+default_hooks = dict(
+    visualization=dict(type='mmmac.WaveformVisualizationHook', enable=True,
+                       interval=10))
