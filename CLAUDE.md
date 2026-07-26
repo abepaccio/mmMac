@@ -37,7 +37,8 @@ Smoke config (no download, ~15 s):
   (mirror structure). Runner-level behavior → `tests/integration/`;
   learning-capability checks → `tests/overfit/`.
 - Configs inherit `configs/_base_/default_runtime.py`. Keep the gloo
-  backend (macOS constraint).
+  backend (macOS constraint). wandb is opt-in via
+  `configs/_base_/vis_wandb.py`.
 - `data/` and `work_dirs/` are gitignored scratch space — never commit
   them, never store code there.
 

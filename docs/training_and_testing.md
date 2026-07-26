@@ -78,6 +78,20 @@ work_dirs/lenet5_mnist/
 (`/private/var/.../pytest-of-<user>/…`), which pytest garbage-collects —
 run the config via `tools/train.py` if you want to keep the outputs.
 
+### wandb logging
+
+Add `configs/_base_/vis_wandb.py` to an experiment's `_base_` list (after
+`default_runtime.py`), or create a sibling config:
+
+```python
+_base_ = ['./lenet5_mnist.py', '../_base_/vis_wandb.py']
+```
+
+Then log in once with `wandb login` (or set `WANDB_API_KEY`). Every scalar
+that mmengine logs (loss, accuracy, lr, ...) is mirrored to wandb.
+Use `WANDB_MODE=offline` to train without network access and `wandb sync`
+later.
+
 ---
 
 ## 日本語
@@ -157,3 +171,17 @@ work_dirs/lenet5_mnist/
 `work_dir` は pytest の `tmp_path`
 (`/private/var/.../pytest-of-<ユーザー>/…`)になり、pytest が自動削除
 します。出力を残したい場合は `tools/train.py` から実行してください。
+
+### wandb ロギング
+
+実験 config の `_base_` リストに `configs/_base_/vis_wandb.py` を
+(`default_runtime.py` より後に)追加するか、派生 config を作ります:
+
+```python
+_base_ = ['./lenet5_mnist.py', '../_base_/vis_wandb.py']
+```
+
+その後、マシンごとに一度 `wandb login`(または `WANDB_API_KEY` を設定)
+してください。mmengine が記録するスカラー(loss、accuracy、lr など)が
+すべて wandb にミラーされます。ネットワークなしで学習する場合は
+`WANDB_MODE=offline` で実行し、後から `wandb sync` します。
